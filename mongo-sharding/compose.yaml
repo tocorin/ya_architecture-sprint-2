@@ -1,16 +1,64 @@
 name: mongo-sharding
 services:
-  configSrv:
+  configSrv0:
     image: mongo:latest
-    container_name: configSrv 
+    container_name: configSrv0 
     restart: always
     ports:
-      - "27017:27017"
+      - "27117:27017"
     networks:
       app-network:
         ipv4_address: 173.17.0.10
     volumes:
-      - config-data:/data/db
+      - config0-data:/data/db
+    command:
+      [
+        "--configsvr",
+        "--replSet",
+        "config_server",
+        "--bind_ip_all",
+        "--port",
+        "27017"
+      ] 
+    healthcheck:
+      test: [ "CMD", "mongo", "--eval", "db.adminCommand('ping')" ]
+      interval: 5s
+      start_period: 10s
+  configSrv1:
+    image: mongo:latest
+    container_name: configSrv1 
+    restart: always
+    ports:
+      - "27217:27017"
+    networks:
+      app-network:
+        ipv4_address: 173.17.0.50
+    volumes:
+      - config1-data:/data/db
+    command:
+      [
+        "--configsvr",
+        "--replSet",
+        "config_server",
+        "--bind_ip_all",
+        "--port",
+        "27017"
+      ] 
+    healthcheck:
+      test: [ "CMD", "mongo", "--eval", "db.adminCommand('ping')" ]
+      interval: 5s
+      start_period: 10s
+  configSrv2:
+    image: mongo:latest
+    container_name: configSrv2 
+    restart: always
+    ports:
+      - "27317:27017"
+    networks:
+      app-network:
+        ipv4_address: 173.17.0.51
+    volumes:
+      - config2-data:/data/db
     command:
       [
         "--configsvr",
@@ -34,7 +82,7 @@ services:
       app-network:
         ipv4_address: 173.17.0.9
     volumes:
-      - shard0-data:/data/db
+      - shard00-data:/data/db
     command:
       [
         "--shardsvr", 
@@ -58,7 +106,7 @@ services:
       app-network:
         ipv4_address: 173.17.0.8
     volumes:
-      - shard1-data:/data/db
+      - shard01-data:/data/db
     command:
       [
         "--shardsvr",
@@ -81,7 +129,7 @@ services:
       [
         "mongos",
         "--configdb", 
-        "config_server/configSrv:27017",
+        "config_server/configSrv0:27017,configSrv1:27017,configSrv2:27017",
         "--bind_ip_all",
         "--port",
         "27020"
@@ -114,6 +162,8 @@ networks:
       config:
         - subnet: 173.17.0.0/16
 volumes:
-  config-data:
-  shard0-data:
-  shard1-data:
+  config0-data:
+  config1-data:
+  config2-data:
+  shard00-data:
+  shard01-data:
