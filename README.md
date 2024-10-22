@@ -6,6 +6,10 @@
 
 ```shell
 docker compose up -d
+Зачистить с volumes
+```
+```shell
+docker compose down -v
 ```
 
 Заполняем mongodb данными
