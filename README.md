@@ -6,17 +6,16 @@
 
 ```shell
 docker compose up -d
-Зачистить с volumes
-```
-```shell
-docker compose down -v
-```
+
 
 Заполняем mongodb данными
 
 ```shell
 ./scripts/mongo-init.sh
 ```
+
+
+
 
 ## Как проверить
 
@@ -37,3 +36,11 @@ curl --silent http://ifconfig.me
 ## Доступные эндпоинты
 
 Список доступных эндпоинтов, swagger http://<ip виртуальной машины>:8080/docs
+
+
+## Полезная информация
+Зачистить стенд с удалением volumes
+
+```shell
+docker compose down -v
+```
