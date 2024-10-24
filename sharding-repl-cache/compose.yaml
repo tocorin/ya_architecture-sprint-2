@@ -303,9 +303,9 @@ services:
     ports:
       - 8080:8080
     environment:
-      MONGODB_URL: "mongodb://173.17.2.0:27017"
+      MONGODB_URL: "mongodb://router:27017"
       MONGODB_DATABASE_NAME: "somedb"
-      REDIS_URL: "redis://173.17.4.1:6379"
+      REDIS_URL: "redis://redis_0:6379"
     networks:
       app-network:
         ipv4_address: 173.17.3.1

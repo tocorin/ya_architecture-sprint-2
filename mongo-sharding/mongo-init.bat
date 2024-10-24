@@ -6,13 +6,6 @@ echo "Настройка Конфигурационных серверов"
 
 docker compose exec -T configSrv0 mongosh --host configSrv0 --port 27017 --quiet < .\scripts\init.config-srv.js
 (echo.)
-
-(echo.)
-echo "Немножко подождем... (5с)"
-@REM немного ожидаем, ибо шарды могут инициализровать дольше из-за чего роутер выпадет в ошибку
-ping 127.0.0.1 -n 6 > nul
-(echo.)
-
 echo "Настройка Шардов"
 (echo.)
 echo "Первый шард"

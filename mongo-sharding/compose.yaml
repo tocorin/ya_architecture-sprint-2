@@ -1,14 +1,24 @@
 name: mongo-sharding
 services:
+
+  #
+  # Конфигурационные сервера
+  # host port offset +0
+  #
+  #
+  # configSrv0 | 173.15.0.2 | 27017:27017
+  # configSrv1 | 173.15.0.3 | 27018:27017
+  # configSrv2 | 173.15.0.4 | 27019:27017
+  #
   configSrv0:
     image: mongo:latest
     container_name: configSrv0 
     restart: always
     ports:
-      - "27117:27017"
+      - "27017:27017"
     networks:
       app-network:
-        ipv4_address: 173.17.0.10
+        ipv4_address: 173.15.0.2
     volumes:
       - config0-data:/data/db
     command:
@@ -22,17 +32,17 @@ services:
       ] 
     healthcheck:
       test: [ "CMD", "mongo", "--eval", "db.adminCommand('ping')" ]
-      interval: 5s
+      interval: 30s
       start_period: 10s
   configSrv1:
     image: mongo:latest
     container_name: configSrv1 
     restart: always
     ports:
-      - "27217:27017"
+      - "27018:27017"
     networks:
       app-network:
-        ipv4_address: 173.17.0.50
+        ipv4_address: 173.15.0.3
     volumes:
       - config1-data:/data/db
     command:
@@ -46,17 +56,17 @@ services:
       ] 
     healthcheck:
       test: [ "CMD", "mongo", "--eval", "db.adminCommand('ping')" ]
-      interval: 5s
+      interval: 30s
       start_period: 10s
   configSrv2:
     image: mongo:latest
     container_name: configSrv2 
     restart: always
     ports:
-      - "27317:27017"
+      - "27019:27017"
     networks:
       app-network:
-        ipv4_address: 173.17.0.51
+        ipv4_address: 173.15.0.4
     volumes:
       - config2-data:/data/db
     command:
@@ -70,17 +80,26 @@ services:
       ] 
     healthcheck:
       test: [ "CMD", "mongo", "--eval", "db.adminCommand('ping')" ]
-      interval: 5s
+      interval: 30s
       start_period: 10s
-  shard0:
+  #
+  # Шарды
+  #
+  # host port offset +100 
+  #
+  # shard0-0 | 173.15.1.1 | 27117:27017
+  #
+  # shard1-0 | 173.15.1.2 | 27120:27017
+  #
+  shard0-0:
     image: mongo:latest
-    container_name: shard0
+    container_name: shard0-0
     restart: always
     ports:
-      - "27018:27018"
+      - "27117:27017"
     networks:
       app-network:
-        ipv4_address: 173.17.0.9
+        ipv4_address: 173.15.1.1
     volumes:
       - shard00-data:/data/db
     command:
@@ -90,23 +109,23 @@ services:
         "shard0", 
         "--bind_ip_all",
         "--port",
-        "27018"
+        "27017"
       ]
     healthcheck:
       test: [ "CMD", "mongo", "--eval", "db.adminCommand('ping')" ]
-      interval: 5s
-      start_period: 10s
-  shard1:
+      interval: 30s
+      start_period: 10s   
+  shard1-0:
     image: mongo:latest
-    container_name: shard1
+    container_name: shard1-0
     restart: always
     ports:
-      - "27019:27019"
+      - "27120:27017"
     networks:
       app-network:
-        ipv4_address: 173.17.0.8
+        ipv4_address: 173.15.1.2
     volumes:
-      - shard01-data:/data/db
+      - shard10-data:/data/db
     command:
       [
         "--shardsvr",
@@ -114,17 +133,27 @@ services:
         "shard1", 
         "--bind_ip_all",
         "--port",
-        "27019"
+        "27017"
       ]
+    healthcheck:
+      test: [ "CMD", "mongo", "--eval", "db.adminCommand('ping')" ]
+      interval: 30s
+      start_period: 10s
+  #
+  # Роутер
+  # host port offset +200 
+  #
+  # router | 173.15.2.1 | 27217:27017
+  #
   router:
     image: mongo:latest
     container_name: router
     restart: always
     ports:
-      - "27020:27020"
+      - "27217:27017"
     networks:
       app-network:
-        ipv4_address: 173.17.0.7
+        ipv4_address: 173.15.2.1
     command:
       [
         "mongos",
@@ -132,12 +161,18 @@ services:
         "config_server/configSrv0:27017,configSrv1:27017,configSrv2:27017",
         "--bind_ip_all",
         "--port",
-        "27020"
+        "27017"
       ]
     healthcheck:
       test: [ "CMD", "mongo", "--eval", "db.adminCommand('ping')" ]
-      interval: 5s
+      interval: 30s
       start_period: 10s
+  #
+  # Приложение
+  # host port offset +0
+  #
+  # pymongo_api | 173.15.3.1 | 8080:8080
+  #
   pymongo_api:
     container_name: pymongo_api
     build: 
@@ -149,21 +184,21 @@ services:
     ports:
       - 8080:8080
     environment:
-      MONGODB_URL: "mongodb://173.17.0.7:27020"
+      MONGODB_URL: "mongodb://router:27017"
       MONGODB_DATABASE_NAME: "somedb"
     networks:
       app-network:
-        ipv4_address: 173.17.0.11
+        ipv4_address: 173.15.3.1
 networks:
   app-network:
     driver: bridge
     ipam:
       driver: default
       config:
-        - subnet: 173.17.0.0/16
+        - subnet: 173.15.0.0/16
 volumes:
   config0-data:
   config1-data:
   config2-data:
   shard00-data:
-  shard01-data:
+  shard10-data:

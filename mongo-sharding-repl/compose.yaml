@@ -6,9 +6,9 @@ services:
   # host port offset +0
   #
   #
-  # configSrv0 | 173.17.0.2 | 27017:27017
-  # configSrv1 | 173.17.0.3 | 27018:27017
-  # configSrv2 | 173.17.0.4 | 27019:27017
+  # configSrv0 | 173.16.0.2 | 27017:27017
+  # configSrv1 | 173.16.0.3 | 27018:27017
+  # configSrv2 | 173.16.0.4 | 27019:27017
   #
   configSrv0:
     image: mongo:latest
@@ -18,7 +18,7 @@ services:
       - "27017:27017"
     networks:
       app-network:
-        ipv4_address: 173.17.0.2
+        ipv4_address: 173.16.0.2
     volumes:
       - config0-data:/data/db
     command:
@@ -42,7 +42,7 @@ services:
       - "27018:27017"
     networks:
       app-network:
-        ipv4_address: 173.17.0.3
+        ipv4_address: 173.16.0.3
     volumes:
       - config1-data:/data/db
     command:
@@ -66,7 +66,7 @@ services:
       - "27019:27017"
     networks:
       app-network:
-        ipv4_address: 173.17.0.4
+        ipv4_address: 173.16.0.4
     volumes:
       - config2-data:/data/db
     command:
@@ -88,13 +88,13 @@ services:
   #
   # host port offset +100 
   #
-  # shard0-0 | 173.17.1.0 | 27117:27017
-  # shard0-1 | 173.17.1.1 | 27118:27017
-  # shard0-2 | 173.17.1.2 | 27119:27017
+  # shard0-0 | 173.16.1.0 | 27117:27017
+  # shard0-1 | 173.16.1.1 | 27118:27017
+  # shard0-2 | 173.16.1.2 | 27119:27017
   #
-  # shard1-0 | 173.17.1.3 | 27120:27017
-  # shard1-1 | 173.17.1.4 | 27121:27017
-  # shard1-2 | 173.17.1.5 | 27122:27017
+  # shard1-0 | 173.16.1.3 | 27120:27017
+  # shard1-1 | 173.16.1.4 | 27121:27017
+  # shard1-2 | 173.16.1.5 | 27122:27017
   #
   shard0-0:
     image: mongo:latest
@@ -104,7 +104,7 @@ services:
       - "27117:27017"
     networks:
       app-network:
-        ipv4_address: 173.17.1.0
+        ipv4_address: 173.16.1.0
     volumes:
       - shard00-data:/data/db
     command:
@@ -128,7 +128,7 @@ services:
       - "27118:27017"
     networks:
       app-network:
-        ipv4_address: 173.17.1.1
+        ipv4_address: 173.16.1.1
     volumes:
       - shard01-data:/data/db
     command:
@@ -152,7 +152,7 @@ services:
       - "27119:27017"
     networks:
       app-network:
-        ipv4_address: 173.17.1.2
+        ipv4_address: 173.16.1.2
     volumes:
       - shard02-data:/data/db
     command:
@@ -176,7 +176,7 @@ services:
       - "27020:27017"
     networks:
       app-network:
-        ipv4_address: 173.17.1.3
+        ipv4_address: 173.16.1.3
     volumes:
       - shard10-data:/data/db
     command:
@@ -200,7 +200,7 @@ services:
       - "27021:27017"
     networks:
       app-network:
-        ipv4_address: 173.17.1.4
+        ipv4_address: 173.16.1.4
     volumes:
       - shard11-data:/data/db
     command:
@@ -224,7 +224,7 @@ services:
       - "27022:27017"
     networks:
       app-network:
-        ipv4_address: 173.17.1.5
+        ipv4_address: 173.16.1.5
     volumes:
       - shard12-data:/data/db
     command:
@@ -245,7 +245,7 @@ services:
   # Роутер
   # host port offset +200 
   #
-  # router | 173.17.2.0 | 27217:27017
+  # router | 173.16.2.0 | 27217:27017
   #
   router:
     image: mongo:latest
@@ -255,7 +255,7 @@ services:
       - "27217:27017"
     networks:
       app-network:
-        ipv4_address: 173.17.2.0
+        ipv4_address: 173.16.2.0
     command:
       [
         "mongos",
@@ -275,7 +275,7 @@ services:
   # Приложение
   # host port offset +0
   #
-  # pymongo_api | 173.17.3.1 | 8080:8080
+  # pymongo_api | 173.16.3.1 | 8080:8080
   #
   pymongo_api:
     container_name: pymongo_api
@@ -286,20 +286,20 @@ services:
     depends_on:
       - router
     ports:
-      - 18080:8080
+      - 8080:8080
     environment:
-      MONGODB_URL: "mongodb://173.17.2.0:27017"
+      MONGODB_URL: "mongodb://router:27017"
       MONGODB_DATABASE_NAME: "somedb"
     networks:
       app-network:
-        ipv4_address: 173.17.3.1
+        ipv4_address: 173.16.3.1
 networks:
   app-network:
     driver: bridge
     ipam:
       driver: default
       config:
-        - subnet: 173.17.0.0/16
+        - subnet: 173.16.0.0/16
 volumes:
   config0-data:
   config1-data:
